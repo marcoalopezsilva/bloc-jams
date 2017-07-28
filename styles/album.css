@@ -55,7 +55,7 @@ body.album{
 }
 
 /* #2 */
-@@media (max-width: 640px) and (min-width: 320px) {
+@media (max-width: 640px) and (min-width: 320px) {
     .album-view-details {
         text-align: center;
     }
