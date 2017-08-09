@@ -31,6 +31,23 @@ var albumMarconi = {
     ]
 };
 
+
+// Added third album
+var albumU2 = {
+    title: 'The Joshua Tree',
+    artist: 'U2',
+    label: 'Interscope Records',
+    year: '1987',
+    albumArtUrl: 'assets/images/album_covers/The_Joshua_Tree.png',
+    songs: [
+        { title: 'Where the Streets have no Name', duration: '5:38' },
+        { title: 'I Still Haven`t found What I`m Looking For', duration: '4:38' },
+        { title: 'With or Without You', duration: '4:56'},
+        { title: 'Bullet the Blue Sky', duration: '4:32' },
+        { title: 'Running to Stand Still', duration: '4:18'}
+    ]
+};
+
 var createSongRow = function (songNumber, songName, songLength) {
     var template =
         '<tr class="album-view-song-item">'
@@ -66,5 +83,18 @@ var setCurrentAlbum = function (album) {
 };
 
 window.onload = function () {
-        setCurrentAlbum(albumPicasso);
+    var counter = 0;
+    setCurrentAlbum(albumPicasso);
+    document.getElementById("album-cover-image").addEventListener("click", function () {
+        //alert("User clicked on image");
+        counter++;
+        if (counter == 1) { setCurrentAlbum(albumMarconi); }
+        if (counter == 2) { setCurrentAlbum(albumU2);}
+        if (counter == 3) {
+            setCurrentAlbum(albumPicasso);
+            counter = 0;
+        }
+    });
 };
+
+//document.getElementsByClassName("album-cover-art").addEventListener("click", alert("User clicked on album cover"));
