@@ -48,6 +48,9 @@ var albumU2 = {
     ]
 };
 
+// Put all albums into an array
+var albums = [albumPicasso, albumMarconi, albumU2];
+
 var createSongRow = function (songNumber, songName, songLength) {
     var template =
         '<tr class="album-view-song-item">'
@@ -83,18 +86,14 @@ var setCurrentAlbum = function (album) {
 };
 
 window.onload = function () {
-    var counter = 0;
-    setCurrentAlbum(albumPicasso);
-    document.getElementById("album-cover-image").addEventListener("click", function () {
-        //alert("User clicked on image");
-        counter++;
-        if (counter == 1) { setCurrentAlbum(albumMarconi); }
-        if (counter == 2) { setCurrentAlbum(albumU2);}
-        if (counter == 3) {
-            setCurrentAlbum(albumPicasso);
-            counter = 0;
+    setCurrentAlbum(albums[0]);
+    var i = 0;
+    document.getElementById("album-cover-image").addEventListener("click", function (event) {
+        i++;
+        setCurrentAlbum(albums[i]);
+        if (i == albums.length ) {
+            i = 0;
+            setCurrentAlbum(albums[i]);
         }
     });
 };
-
-//document.getElementsByClassName("album-cover-art").addEventListener("click", alert("User clicked on album cover"));
