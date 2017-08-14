@@ -34,7 +34,8 @@ var albumMarconi = {
 var createSongRow = function (songNumber, songName, songLength) {
     var template =
         '<tr class="album-view-song-item">'
-    + '  <td class="song-item-number">' + songNumber + '</td>'
+//    + '  <td class="song-item-number">' + songNumber + '</td>'
+    + '  <td class="song-item-number" data-song-number="'+ songNumber + '">' + songNumber + '</td>'
     + '  <td class="song-item-title">' + songName + '</td>'
     + '  <td class="song-item-duration">'+ songLength + '</td>'
     + '</tr>'
@@ -65,6 +66,31 @@ var setCurrentAlbum = function (album) {
     }
 };
 
+//Listen for user to mouse-over the songlist
+var songListContainer = document.getElementsByClassName('album-view-song-list')[0];
+var songRows = document.getElementsByClassName('album-view-song-item');
+
+// Add template for play button
+var playButtonTemplate = '<a class="album-song-button"><span class="ion-play"></span></a>';
+
 window.onload = function () {
         setCurrentAlbum(albumPicasso);
+
+        // Register the element for which the event was triggered
+        songListContainer.addEventListener('mouseover', function (event) {
+            // Target only the line (song row) that the user is hovering on
+            if (event.target.parentElement.className === 'album-view-song-item') {
+                // Change line content (song number) to play button
+                event.target.parentElement.querySelector('.song-item-number').innerHTML = playButtonTemplate;
+            }
+        });
+
+        //Loop for listening to the user LEAVING the song row
+        for (var i = 0; i < songRows.length; i++) {
+            songRows[i].addEventListener('mouseleave', function (event) {
+                // Instructions to revert the play button to the song number
+                this.children[0].innerHTML = this.children[0].getAttribute('data-song-number');
+
+            });
+        }
 };
