@@ -37,7 +37,8 @@ var createSongRow = function (songNumber, songName, songLength) {
 //    + '  <td class="song-item-number">' + songNumber + '</td>'
     + '  <td class="song-item-number" data-song-number="'+ songNumber + '">' + songNumber + '</td>'
     + '  <td class="song-item-title">' + songName + '</td>'
-    + '  <td class="song-item-duration">'+ songLength + '</td>'
+    // ----> CHANGE CLASS NAME IN NEXT LINE (E.G. ADD "S" TO "SONG") TO TEST MODIFIED findParentByClassName
+    + '  <td class="songs-item-duration">'+ songLength + '</td>'
     + '</tr>'
     ;
     return template;
@@ -68,17 +69,22 @@ var setCurrentAlbum = function (album) {
 
 // Find the parent class of an element
 var findParentByClassName = function (element, targetClass) {
-    if (element) {
+    // Check with Junior if the next line is the same as writing `if (element)`
+    if (element !== null) {
         var currentParent = element.parentElement;
+        //Added next line to check if parent exists, for checkpoint13-assignment
+        if (currentParent === null) { console.log("No parent found") }
+        if (currentParent.className !== targetClass) { console.log("No parent found with that class name")}
         while (currentParent.className !== targetClass && currentParent.className !== null) {
             currentParent = currentParent.parentElement;
         }
+        //Added next line to log if no parent with targetClass is found; for checkpoint13-assignment
         return currentParent;
     }
 };
 
 //Function which returns the song item
-// Note: I added breaks because I think they are missing from Bloc's code, but they don't seem to matter...
+// Note: I added breaks because I thought they were missing from Bloc's code, but they don't seem to matter...
 var getSongItem = function (element) {
     switch (element.className) {
         case 'album-song-button':
@@ -98,7 +104,8 @@ var getSongItem = function (element) {
             return element;
             break;
         default:
-            return;
+        // Question: Bloc's code does not return element - why?
+            return element;
     }
 };
 
