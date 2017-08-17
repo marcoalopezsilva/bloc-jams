@@ -69,16 +69,21 @@ var setCurrentAlbum = function (album) {
 
 // Find the parent class of an element
 var findParentByClassName = function (element, targetClass) {
-    // Check with Junior if the next line is the same as writing `if (element)`
+    // Check that element is not null
     if (element !== null) {
         var currentParent = element.parentElement;
         //Added next line to check if parent exists, for checkpoint13-assignment
-        if (currentParent === null) { console.log("No parent found") }
-        if (currentParent.className !== targetClass) { console.log("No parent found with that class name")}
+        if (currentParent === null) {
+            return console.log("No parent found");
+        }
         while (currentParent.className !== targetClass && currentParent.className !== null) {
             currentParent = currentParent.parentElement;
         }
-        //Added next line to log if no parent with targetClass is found; for checkpoint13-assignment
+        // if code executed this far, the currentParent is falsy (null, undefined, false) so we didn't find an element
+        if (!currentParent) {
+            return console.log("No parent found with that class name");
+        }
+        // Otherwise: 
         return currentParent;
     }
 };
