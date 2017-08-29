@@ -1,8 +1,26 @@
-// CODE FOR CHECKPOINT19
+// CODE FOR CHECKPOINT20
 
 var setSong = function(songNumberInput) {
+    // Next line stops the current playback if the user starts a new song, to prevent concurrent playback of different songs
+    if (currentSoundFile) {
+        currentSoundFile.stop();
+    }
     currentlyPlayingSongNumber = parseInt(songNumberInput);
     currentSongFromAlbum = currentAlbum.songs[songNumberInput -1];
+    // Store the sound object in currentSoundFile
+    currentSoundFile = new buzz.sound(currentSongFromAlbum.audioUrl, {
+        formats: ['mp3'],
+        // Next line: load the audio files as soon as page loads
+        preload: true
+    });
+    setVolume(currentVolume);
+};
+
+// Question for Junior: As I understand, '.setvolume' in line 22 is a Buzz method. So, shouldn't we name this function differently (say, 'setPlaybackVolume') to avoid confusion?
+var setVolume = function(volume) {
+    if (currentSoundFile) {
+        currentSoundFile.setVolume(volume);
+    }
 };
 
 var getSongNumberCell = function(number) {
@@ -31,13 +49,19 @@ var createSongRow = function (songNumber, songName, songLength) {
             // New song is playing
             $(this).html(pauseButtonTemplate);
             setSong(songNumber);
+            currentSoundFile.play();
             updatePlayerBarSong();
         } else if (currentlyPlayingSongNumber === songNumber) {
             // Switch from Pause -> Play button to pause currently playing song.
-            $(this).html(playButtonTemplate);
-            $(".main-controls .play-pause").html(playerBarPlayButton);
-            currentlyPlayingSongNumber = null;
-            currentSongFromAlbum = null;
+            if (currentSoundFile.isPaused()) {
+                currentSoundFile.play();
+                $(this).html(pauseButtonTemplate);
+                $('.main-controls .play-pause').html(playerBarPauseButton);
+            } else {
+                currentSoundFile.pause();
+                $(this).html(playButtonTemplate);
+                $('.main-controls .play-pause').html(playerBarPlayButton);
+            }
         }
     };
 
@@ -117,6 +141,7 @@ var nextSong = function () {
     var lastSongNumber = currentlyPlayingSongNumber;
     // Set a new current song
     setSong(currentSongIndex + 1);
+    currentSoundFile.play();
     // Update player bar's information
     updatePlayerBarSong();
     var $nextSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
@@ -137,6 +162,7 @@ var previousSong = function () {
     var lastSongNumber = currentlyPlayingSongNumber;
     // Set a new current song
     setSong(currentSongIndex+1);
+    currentSoundFile.play();
     // Update player bar's information
     updatePlayerBarSong();
     $('main-controls .play-pause').html(playerBarPauseButton);
@@ -160,6 +186,10 @@ var currentAlbum = null;
 var currentlyPlayingSongNumber = null;
 // Next line will be used to hold the song's title and duration (obtained from "songs" array within album object)
 var currentSongFromAlbum = null;
+// Create a global variable to use with Buzz API (variable will hold the sound object)
+var currentSoundFile = null;
+// Set volume
+var currentVolume = 80;
 // Next lines hold JQuery selectors for next&previous buttons
 var $previousButton = $('.main-controls .previous');
 var $nextButton = $('.main-controls .next');
