@@ -1,4 +1,4 @@
-// CODE FOR CHECKPOINT20
+// CODE FOR CHECKPOINT21
 
 var setSong = function(songNumberInput) {
     // Next line stops the current playback if the user starts a new song, to prevent concurrent playback of different songs
@@ -13,11 +13,18 @@ var setSong = function(songNumberInput) {
         // Next line: load the audio files as soon as page loads
         preload: true
     });
-    setVolume(currentVolume);
+    setVolumeNow(currentVolume);
 };
 
-// Question for Junior: As I understand, '.setvolume' in line 22 is a Buzz method. So, shouldn't we name this function differently (say, 'setPlaybackVolume') to avoid confusion?
-var setVolume = function(volume) {
+// This next song enables the user to use the seekbar to fwd/rwd a song
+var seek = function(time) {
+        if (currentSoundFile) {
+            currentSoundFile.setTime(time);
+        }
+};
+
+// '.setvolume' is a Buzz method. So, I named the function 'setVolumeNow' (to avoid confusion)
+var setVolumeNow = function(volume) {
     if (currentSoundFile) {
         currentSoundFile.setVolume(volume);
     }
@@ -49,11 +56,13 @@ var createSongRow = function (songNumber, songName, songLength) {
             $(this).html(pauseButtonTemplate);
             setSong(songNumber);
             currentSoundFile.play();
+            updateSeekBarWhileSongPlays();
             updatePlayerBarSong();
         } else if (currentlyPlayingSongNumber === songNumber) {
             // Switch from Pause -> Play button to pause currently playing song.
             if (currentSoundFile.isPaused()) {
                 currentSoundFile.play();
+                updateSeekBarWhileSongPlays();
                 $(this).html(pauseButtonTemplate);
                 $('.main-controls .play-pause').html(playerBarPauseButton);
             } else {
@@ -114,6 +123,63 @@ var setCurrentAlbum = function (album) {
     }
 };
 
+// Next block feeds the seekbar the information for the song which is playing. getTime and getDuration are Buzz methods
+var updateSeekBarWhileSongPlays = function () {
+        if (currentSoundFile) {
+            currentSoundFile.bind('timeupdate', function(event) {
+                var seekBarFillRatio = this.getTime() / this.getDuration();
+                var $seekBar = $('.seek-control .seek-bar');
+                updateSeekPercentage($seekBar, seekBarFillRatio);
+            });
+        }
+};
+
+// This function works for both the duration seekbar, and the volume seekbar. It expresses the ratio in terms CSS can interpret
+var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
+        var offsetXPercent = seekBarFillRatio * 100;
+        // #1
+        offsetXPercent = Math.max(0, offsetXPercent);
+        offsetXPercent = Math.min(100, offsetXPercent);
+        // #2
+        var percentageString = offsetXPercent + '%';
+        $seekBar.find('.fill').width(percentageString);
+        $seekBar.find('.thumb').css({left: percentageString});
+};
+
+// This function works for both the duration seekbar, and the volume seekbar
+var setupSeekBars = function() {
+        // Next line: creates JQuery object for elements with '.player-bar .seek-bar'
+        var $seekBars = $('.player-bar .seek-bar');
+        // Defines an event for when the user clicks on the seek bars
+        $seekBars.click(function(event) {
+            // Next line calculates how far right (from the start of the seek bar) the user clicked. pageX holds the X coordinate at which the event ocurred
+            var offsetX = event.pageX - $(this).offset().left;
+            // Next line: calculates the width of the seekbar
+            var barWidth = $(this).width();
+            // Then we determine how far right the user clicked, as a percentage of width
+            var seekBarFillRatio = offsetX / barWidth;
+            // Finally, we update the percentage by calling our function and passing the calculated ratio (and the specific seekbar in which it ocurred)
+            updateSeekPercentage($(this), seekBarFillRatio);
+        });
+        // Here we detect when the user holds the mouse click on one of the seek bars (by listening on elements with class 'thumb')
+        $seekBars.find('.thumb').mousedown(function(event) {
+            // We determine which of the seekbars triggered the event ('.parent').
+            var $seekBar = $(this).parent();
+            // #9
+            $(document).bind('mousemove.thumb', function(event) {
+                var offsetX = event.pageX - $seekBar.offset().left;
+                var barWidth = $seekBar.width();
+                var seekBarFillRatio = offsetX / barWidth;
+                updateSeekPercentage($seekBar, seekBarFillRatio);
+            });
+            // #10
+            $(document).bind('mouseup.thumb', function () {
+                $(document).unbind('mousemove.thumb');
+                $(document).unbind('mouseup.thumb');
+            });
+        }); 
+};
+
 var trackIndex = function (album, song) {
     return album.songs.indexOf(song);
 };
@@ -142,6 +208,7 @@ var nextSong = function () {
     setSong(currentSongIndex + 1);
     currentSoundFile.play();
     // Update player bar's information
+    updateSeekBarWhileSongPlays();
     updatePlayerBarSong();
     var $nextSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
     var $lastSongNumberCell = $('.song-item-number[data-song-number="' + lastSongNumber + '"]');
@@ -163,6 +230,7 @@ var previousSong = function () {
     setSong(currentSongIndex+1);
     currentSoundFile.play();
     // Update player bar's information
+    updateSeekBarWhileSongPlays();
     updatePlayerBarSong();
     $('main-controls .play-pause').html(playerBarPauseButton);
     var $previousSongNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
@@ -180,6 +248,7 @@ var togglePlayfromPlayerBar = function () {
         //$(this).html(pauseButtonTemplate);
         $('.main-controls .play-pause').html(playerBarPauseButton);
         currentSoundFile.play();
+        updateSeekBarWhileSongPlays();
     } else if (currentSoundFile) {
         var currentlyPlayingCell = getSongNumberCell(currentlyPlayingSongNumber);
         currentlyPlayingCell.html(playButtonTemplate);
@@ -214,6 +283,7 @@ var $playPauseButton = $('.main-controls .play-pause');
 // Add on-load functions (here, JQuery version)
 $(document).ready(function() {
     setCurrentAlbum(albumPicasso);
+    setupSeekBars();
     $previousButton.click(previousSong);
     $nextButton.click(nextSong);
     $playPauseButton.click(togglePlayfromPlayerBar);
