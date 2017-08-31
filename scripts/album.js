@@ -17,9 +17,10 @@ var setSong = function(songNumberInput) {
 };
 
 // This next song enables the user to use the seekbar to fwd/rwd a song
-var seek = function(time) {
+// FOR CHECKPOINT21: I changed the method here to setPercent (I thought this was easier)
+var seek = function(targetTime) {
         if (currentSoundFile) {
-            currentSoundFile.setTime(time);
+            currentSoundFile.setPercent(targetTime);
         }
 };
 
@@ -160,6 +161,29 @@ var setupSeekBars = function() {
             var seekBarFillRatio = offsetX / barWidth;
             // Finally, we update the percentage by calling our function and passing the calculated ratio (and the specific seekbar in which it ocurred)
             updateSeekPercentage($(this), seekBarFillRatio);
+// FOR CHECKPOINT21: Next block identifies the bar which was clicked and either changes the volume, or sets a point in the song
+            var identifySeekBar = $(this).parent().attr('class');
+            console.log(identifySeekBar);
+            console.log(typeof identifySeekBar);
+            if (identifySeekBar == 'control-group volume') {
+                console.log("Click on volume seekbar");
+                var offsetXPercent = seekBarFillRatio * 100;
+                offsetXPercent = Math.max(0, offsetXPercent);
+                offsetXPercent = Math.min(100, offsetXPercent);
+                setVolumeNow(offsetXPercent);
+                console.log("Volume now at " + offsetXPercent + " %" + "\n" + "---------");
+            } else if (identifySeekBar == 'seek-control') {
+                console.log("Click on song seekbar");
+                var offsetXPercent = seekBarFillRatio * 100;
+                offsetXPercent = Math.max(0, offsetXPercent);
+                offsetXPercent = Math.min(100, offsetXPercent);
+                console.log("Target position: " + offsetXPercent);
+                console.log(typeof offsetXPercent);
+                seek(offsetXPercent);
+                console.log("Song was set at position " + currentSoundFile.getPercent() + " %"  );
+                console.log(typeof currentSoundFile.getPercent() + "\n" + "---------");
+            }
+
         });
         // Here we detect when the user holds the mouse click on one of the seek bars (by listening on elements with class 'thumb')
         $seekBars.find('.thumb').mousedown(function(event) {
@@ -177,7 +201,7 @@ var setupSeekBars = function() {
                 $(document).unbind('mousemove.thumb');
                 $(document).unbind('mouseup.thumb');
             });
-        }); 
+        });
 };
 
 var trackIndex = function (album, song) {
@@ -242,6 +266,10 @@ var previousSong = function () {
 
 //Next block implements toggling Play/Pause button at the Player bar
 var togglePlayfromPlayerBar = function () {
+    // Note for Junior: I added next conditional to handle the case where no song has been selected at the song list and the user hits play at the player bar
+    if (!currentSoundFile) {
+        setSong(1);
+    }
     if (currentSoundFile.isPaused()) {
         var currentlyPlayingCell = getSongNumberCell(currentlyPlayingSongNumber);
         currentlyPlayingCell.html(pauseButtonTemplate);
