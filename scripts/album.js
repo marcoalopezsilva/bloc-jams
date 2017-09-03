@@ -1,4 +1,4 @@
-// CODE FOR CHECKPOINT21
+// CODE FOR CHECKPOINT21-ASSIGNMENT
 
 var setSong = function(songNumberInput) {
     // Next line stops the current playback if the user starts a new song, to prevent concurrent playback of different songs
@@ -40,7 +40,7 @@ var createSongRow = function (songNumber, songName, songLength) {
         '<tr class="album-view-song-item">'
     + '  <td class="song-item-number" data-song-number="'+ songNumber + '">' + songNumber + '</td>'
     + '  <td class="song-item-title">' + songName + '</td>'
-    + '  <td class="song-item-duration">'+ songLength + '</td>'
+    + '  <td class="song-item-duration">'+ filterTimeCode(songLength) + '</td>'
     + '</tr>'
     ;
     var $row = $(template);
@@ -124,6 +124,33 @@ var setCurrentAlbum = function (album) {
     }
 };
 
+// CHECKPOINT21-ASSIGNMENT: NEXT 2 BLOCKS
+// Function to show current (playing) time in player bar
+var setCurrentTimeInPlayerBar = function (currentTime) {
+    var $currentTimeElement = $('.current-time');
+    $currentTimeElement.text(filterTimeCode(currentTime));
+};
+// Function to show the total duration of each song, in player bar
+var setTotalTimeInPlayerBar = function(totalTime) {
+    var $totalTimeElement = $('.total-time');
+    $totalTimeElement.text(filterTimeCode(totalTime));
+};
+//Next function converts time format to minutes:seconds
+var filterTimeCode = function(timeInSeconds) {
+    var formattedTime = "";
+    var parsedTime = parseFloat(timeInSeconds);
+    //console.log(parsedTime);
+    var minutesInTime = Math.floor (parsedTime / 60);
+    var secondsInTime = Math.floor (parsedTime % 60);
+    if (secondsInTime < 10) {
+        formattedTime = minutesInTime + ':' + '0' + secondsInTime;
+    } else {
+        formattedTime = minutesInTime + ':' + secondsInTime;
+    }
+    //console.log (formattedTime);
+    return formattedTime;
+};
+
 // Next block feeds the seekbar the information for the song which is playing. getTime and getDuration are Buzz methods
 var updateSeekBarWhileSongPlays = function () {
         if (currentSoundFile) {
@@ -131,6 +158,12 @@ var updateSeekBarWhileSongPlays = function () {
                 var seekBarFillRatio = this.getTime() / this.getDuration();
                 var $seekBar = $('.seek-control .seek-bar');
                 updateSeekPercentage($seekBar, seekBarFillRatio);
+                // Added next lines for CHECKPOINT21-ASSIGNMENT
+                var currentTime = currentSoundFile.getTime();
+                setCurrentTimeInPlayerBar(currentTime);
+                filterTimeCode(currentTime);
+                var totalTime = currentSoundFile.getDuration();
+                setTotalTimeInPlayerBar(totalTime);
             });
         }
 };
